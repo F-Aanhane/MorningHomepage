@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} DefaultValue {% endblock %}</title>
+</head>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #D6EEEE;
+}
+</style>
+<body>
+    {{ departures }}
+</body>
+<body>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {%for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block content %}
+
+    {% endblock %}
+</body>
+</html>
