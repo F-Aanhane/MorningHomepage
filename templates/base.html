@@ -2,36 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %} DefaultValue {% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} MorningHomepage {% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        table {
+          border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        tr:nth-child(even) {
+          background-color: #ffe9a2 ;
+        }
+
+        td:nth-child(1) {
+            text-align: right;
+        }
+
+        td:nth-child(2) {
+            color: red;
+        }
+
+        td:nth-child(5) {
+            text-align: right;
+        }
+    </style>
 </head>
-<style>
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
 
-th, td {
-  text-align: left;
-  padding: 8px;
-}
-
-tr:nth-child(even) {
-  background-color: #D6EEEE;
-}
-</style>
 <body>
     {{ departures }}
-</body>
-<body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {%for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    {% block content %}
-
-    {% endblock %}
+    <br>
+    <br>
+    <br>
+    <div style="height: 25vh; width: 100%;">
+		<canvas id="myChart"></canvas>
+	</div>
+    <script>
+        const labels = {{ labels | tojson }}
+        const data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Temperature',
+                    data: {{ temperature | tojson}},
+                    fill: false,
+                    borderColor: 'rgb(75,192,192)',
+                    backgroundColor: 'rgb(75,192,192)',
+                    linetension: 0,
+                    yAxisID: 'y1',
+                },
+                {
+                    label: 'Precipitation',
+                    data: {{ precipitation | tojson}},
+                    fill: false,
+                    borderColor: 'rgb(192,192,192)',
+                    backgroundColor: 'rgb(192,192,192)',
+                    linetension: 0,
+                    yAxisID: 'y2',
+                },
+                {
+                    label: 'Precipitation Chance',
+                    data: {{ precipitation_probability | tojson}},
+                    fill: false,
+                    borderColor: 'rgb(192,192,0)',
+                    backgroundColor: 'rgb(192,192,0)',
+                    linetension: 0,
+                    yAxisID: 'y3',
+                }
+            ]
+        };
+        const config = {
+			type: 'line',
+			data: data,
+			options: {
+			    maintainAspectRatio: false,
+                scales: {
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                          drawOnChartArea: false,
+                        },
+                    },
+                     y3: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                          drawOnChartArea: false,
+                        },
+                    },
+                }
+            },
+		};
+		const myChart = new Chart(
+			document.getElementById('myChart'),
+			config
+        );
+    </script>
 </body>
 </html>
