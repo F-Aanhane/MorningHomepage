@@ -31,8 +31,6 @@ def import_weather_data() -> pd.DataFrame:
     print(f"Elevation {response.Elevation()} m asl")
     print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
     print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
-
-    # minutely_15_dataframe = extract_15minute_data(response)
     hourly_dataframe = extract_hourly_data(response)
 
     return hourly_dataframe
@@ -54,6 +52,7 @@ def extract_hourly_data(response):
                    "precipitation": hourly_precipitation,
                    "cloud_cover": hourly_cloud_cover}
     hourly_dataframe = pd.DataFrame(data=hourly_data)
+    hourly_dataframe['temperature_2m'] = hourly_dataframe['temperature_2m'].round(decimals=1)
     return hourly_dataframe
     # .to_html(index=False, border=0)
 

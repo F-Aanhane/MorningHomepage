@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>{% block title %} MorningHomepage {% endblock %}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} MorningHomepage {% endblock %}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="ie=firefox">
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
     <style>
         table {
           border-collapse: collapse;
@@ -19,6 +21,10 @@
           background-color: #ffe9a2 ;
         }
 
+        tr:nth-child(odd) {
+          background-color: #f3f6f4 ;
+        }
+
         td:nth-child(1) {
             text-align: right;
         }
@@ -31,84 +37,148 @@
             text-align: right;
         }
     </style>
-</head>
-
-<body>
-    {{ departures }}
-    <br>
-    <br>
-    <br>
-    <div style="height: 25vh; width: 100%;">
-		<canvas id="myChart"></canvas>
-	</div>
     <script>
-        const labels = {{ labels | tojson }}
-        const data = {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Temperature',
-                    data: {{ temperature | tojson}},
-                    fill: false,
-                    borderColor: 'rgb(75,192,192)',
-                    backgroundColor: 'rgb(75,192,192)',
-                    linetension: 0,
-                    yAxisID: 'y1',
-                },
-                {
-                    label: 'Precipitation',
-                    data: {{ precipitation | tojson}},
-                    fill: false,
-                    borderColor: 'rgb(192,192,192)',
-                    backgroundColor: 'rgb(192,192,192)',
-                    linetension: 0,
-                    yAxisID: 'y2',
-                },
+        $(function () {
+            var ctx = document.getElementById("temp").getContext('2d');
+            const labels = {{ labels | tojson }}
+            var data1 = {
+                datasets: [
+                    {
+                        label: 'Temperature',
+                        data: {{ temperature | tojson}},
+                        fill: false,
+                        borderColor: 'rgb(88,139,139)',
+                        backgroundColor: 'rgb(88,139,139)',
+                        linetension: 0,
+                    },
+                ],
+                labels: labels
+            };
+
+            var config = {
+                type: 'line',
+                data: data1,
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                position: top
+                            }
+                        }],
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                        },
+                    },
+                    legend: {
+                        position: 'chartArea',
+                        labels: {
+                            boxWidth: 12
+                        }
+                    }
+                }
+            }
+            var myLineChart = new Chart(ctx, config);
+
+            var ctx_3 = document.getElementById("rain").getContext('2d');
+            var data3 = {
+                datasets: [
+                    {
+                        label: 'Precipitation',
+                        data: {{ precipitation | tojson}},
+                        fill: false,
+                        borderColor: 'rgb(200,85,61)',
+                        backgroundColor: 'rgb(200,85,61)',
+                        linetension: 0,
+                    }
+                ],
+                labels: labels
+            };
+            var config3 = {
+                type: 'line',
+                data: data3,
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y2: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                              drawOnChartArea: false,
+                            },
+                        },
+                    },
+                    legend: {
+                        position: 'chartArea',
+                        labels: {
+                            boxWidth: 12
+                        }
+                    }
+                }
+            }
+            var myLineChart_3 = new Chart(ctx_3, config3);
+
+
+            var ctx_2 = document.getElementById("percentages").getContext('2d');
+            var data_2 = {
+                datasets: [
                 {
                     label: 'Precipitation Chance',
                     data: {{ precipitation_probability | tojson}},
                     fill: false,
-                    borderColor: 'rgb(192,192,0)',
-                    backgroundColor: 'rgb(192,192,0)',
+                    borderColor: 'rgb(242,143,59)',
+                    backgroundColor: 'rgb(242,143,59)',
                     linetension: 0,
-                    yAxisID: 'y3',
+                },
+                {
+                    label: 'Cloud cover',
+                    data: {{ cloud_cover | tojson}},
+                    fill: false,
+                    borderColor: 'rgb(255,213,194)',
+                    backgroundColor: 'rgb(255,213,194)',
+                    linetension: 0,
+                }],
+                labels: labels
+            };
+            var myLineChart_2 = new Chart(ctx_2, {
+                type: 'line',
+                data: data_2,
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'chartArea',
+                        labels: {
+                            boxWidth: 12
+                        }
+                    }
                 }
-            ]
-        };
-        const config = {
-			type: 'line',
-			data: data,
-			options: {
-			    maintainAspectRatio: false,
-                scales: {
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                    },
-                    y2: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        grid: {
-                          drawOnChartArea: false,
-                        },
-                    },
-                     y3: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        grid: {
-                          drawOnChartArea: false,
-                        },
-                    },
-                }
-            },
-		};
-		const myChart = new Chart(
-			document.getElementById('myChart'),
-			config
-        );
+            });
+        });
+
     </script>
+</head>
+
+<body style="background-color:#f3f6f4">
+    <div>
+        {{ departures }}
+    </div>
+    <br>
+    <br>
+    <br>
+  <div>
+      <canvas id="temp" width="1000px" height="150px"></canvas>
+  </div>
+  <div>
+      <canvas id="rain" width="1000px" height="150px"></canvas>
+  </div>
+  <div>
+      <canvas id="percentages" width="1000px" height="150px"></canvas>
+  </div>
 </body>
 </html>

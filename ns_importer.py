@@ -1,23 +1,42 @@
 import pandas as pd
 import json
-import re
-# import dotenv
+import requests
+import os
+from dotenv import load_dotenv
 from enum import Enum
 
 
-def open_json(example) -> pd.DataFrame:
-    with open(example) as f:
-        payload = get_ns_payload(f)
-    return pd.DataFrame(payload)
+load_dotenv()
 
 
-def get_ns_payload(f):
-    payload = json.load(f)['payload']
+def open_example_json(example_file) -> dict:
+    with open(example_file) as f:
+        payload = json.load(f)
+    return payload
+
+
+def get_payload_departures():
+    response_json = get_response()
+    payload = response_json['payload']
     departures = payload['departures']
     return departures
 
 
-def prepare_data(data: pd.DataFrame) -> str:
+def get_response():
+    url = os.getenv('url')
+
+    payload = {}
+    headers = {
+        'Cache-Control': os.getenv('cache'),
+        'Ocp-Apim-Subscription-Key': os.getenv('key')
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    return response.json()
+
+
+def prepare_data(payload: dict) -> str:
+    data = pd.DataFrame(payload)
     data[['planned', 'actual', 'delay']] = refactor_dt_cols(data.actualDateTime, data.plannedDateTime)
     data = data \
         .drop(['name', 'product', 'plannedTimeZoneOffset', 'actualTimeZoneOffset', 'routeStations', 'departureStatus',
@@ -44,8 +63,11 @@ def extract_warning(x):
     return '\n '.join(m['message'] for m in x if m['style'] == MessageStyle.WARNING.value)
 
 
-def run():
-    payload_ns = open_json('example_ns.json')
+def run(debug=False):
+    if not debug:
+        payload_ns = get_payload_departures()
+    else:
+        payload_ns = open_example_json('example_ns.json')
     ns = prepare_data(payload_ns)
     return ns
 
