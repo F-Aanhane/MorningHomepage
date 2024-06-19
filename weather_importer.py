@@ -6,6 +6,7 @@ import numpy as np
 from retry_requests import retry
 import os
 
+
 def import_weather_data() -> pd.DataFrame:
     # Setup the Open-Meteo API client with cache and retry on error
     cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
