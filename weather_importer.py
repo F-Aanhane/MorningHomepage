@@ -15,8 +15,8 @@ def import_weather_data() -> pd.DataFrame:
     # The order of variables in hourly or daily is important to assign them correctly below
     url = os.getenv('meteo_url')
     params = {
-        "latitude": 52.08,
-        "longitude": 4.3399997,
+        "latitude": os.getenv('lat'),
+        "longitude": os.getenv('long'),
         "minutely_15": ["temperature_2m", "precipitation"],
         "hourly": ["temperature_2m", "precipitation_probability", "precipitation", "cloud_cover"],
         "timezone": "auto",
@@ -52,7 +52,6 @@ def extract_hourly_data(response):
     hourly_dataframe = pd.DataFrame(data=hourly_data)
     hourly_dataframe['temperature_2m'] = hourly_dataframe['temperature_2m'].round(decimals=1)
     return hourly_dataframe
-    # .to_html(index=False, border=0)
 
 
 def extract_15minute_data(response):
@@ -68,4 +67,3 @@ def extract_15minute_data(response):
     ), "temperature_2m": minutely_15_temperature_2m, "precipitation": minutely_15_precipitation}
     minutely_15_dataframe = pd.DataFrame(data=minutely_15_data)
     return minutely_15_dataframe
-    #.to_html(index=False, border=0)
