@@ -1,4 +1,3 @@
-# https://api.open-meteo.com/v1/forecast?latitude=52.08&longitude=4.3399997&minutely_15=temperature_2m,precipitation&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover&timezone=auto&forecast_days=1
 import openmeteo_requests
 import requests_cache
 import pandas as pd
