@@ -2,11 +2,7 @@ import pandas as pd
 import json
 import requests
 import os
-from dotenv import load_dotenv
 from enum import Enum
-
-
-load_dotenv()
 
 
 def open_example_json(example_file) -> dict:
@@ -23,7 +19,7 @@ def get_payload_departures():
 
 
 def get_response():
-    url = os.getenv('url')
+    url = os.getenv('ns_url')
 
     payload = {}
     headers = {

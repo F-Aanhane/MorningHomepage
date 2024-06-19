@@ -1,12 +1,10 @@
 # https://api.open-meteo.com/v1/forecast?latitude=52.08&longitude=4.3399997&minutely_15=temperature_2m,precipitation&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover&timezone=auto&forecast_days=1
-
 import openmeteo_requests
-
 import requests_cache
 import pandas as pd
 import numpy as np
 from retry_requests import retry
-
+import os
 
 def import_weather_data() -> pd.DataFrame:
     # Setup the Open-Meteo API client with cache and retry on error
@@ -15,14 +13,14 @@ def import_weather_data() -> pd.DataFrame:
     openmeteo = openmeteo_requests.Client(session=retry_session)
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://api.open-meteo.com/v1/forecast"
+    url = os.getenv('meteo_url')
     params = {
         "latitude": 52.08,
         "longitude": 4.3399997,
         "minutely_15": ["temperature_2m", "precipitation"],
         "hourly": ["temperature_2m", "precipitation_probability", "precipitation", "cloud_cover"],
         "timezone": "auto",
-        "forecast_days": 1
+        "forecast_hours": 24
     }
     responses = openmeteo.weather_api(url, params=params)
     # Process first location. Add a for-loop for multiple locations or weather models

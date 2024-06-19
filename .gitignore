@@ -157,6 +157,9 @@ cython_debug/
 # Caching-related files
 .cache.sqlite
 
+# Others
+test_departures.html
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
