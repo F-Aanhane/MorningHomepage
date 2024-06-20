@@ -1,24 +1,18 @@
-import pandas as pd
+from pandas import DataFrame, Series, to_datetime
 import json
 import requests
 import os
 from enum import Enum
 
 
-def open_example_json(example_file) -> dict:
-    with open(example_file) as f:
-        payload = json.load(f)
-    return payload
-
-
-def get_payload_departures():
+def get_payload_departures() -> dict:
     response_json = get_response()
     payload = response_json['payload']
     departures = payload['departures']
     return departures
 
 
-def get_response():
+def get_response() -> dict:
     url = os.getenv('ns_url')
 
     payload = {}
@@ -26,13 +20,12 @@ def get_response():
         'Cache-Control': os.getenv('cache'),
         'Ocp-Apim-Subscription-Key': os.getenv('key')
     }
-
     response = requests.request("GET", url, headers=headers, data=payload)
     return response.json()
 
 
 def prepare_data(payload: dict) -> str:
-    data = pd.DataFrame(payload)
+    data = DataFrame(payload)
     data[['planned', 'actual', 'delay']] = refactor_dt_cols(data.actualDateTime, data.plannedDateTime)
     data = data \
         .drop(['name', 'product', 'plannedTimeZoneOffset', 'actualTimeZoneOffset', 'routeStations', 'departureStatus',
@@ -44,22 +37,28 @@ def prepare_data(payload: dict) -> str:
     return html
 
 
-def refactor_dt_cols(actual: pd.Series, planned: pd.Series):
-    actual = pd.to_datetime(actual)
-    planned = pd.to_datetime(planned)
+def refactor_dt_cols(actual: Series, planned: Series) -> DataFrame:
+    actual = to_datetime(actual)
+    planned = to_datetime(planned)
     delay = '+' + (((actual - planned).dt.seconds / 60).astype(int)).astype(str)
     delay = delay.replace('+0', '')
 
     actual = actual.dt.strftime('%H:%M')
     planned = planned.dt.strftime('%H:%M')
-    return pd.DataFrame({'planned': planned, 'actual': actual, 'delay': delay})
+    return DataFrame({'planned': planned, 'actual': actual, 'delay': delay})
 
 
-def extract_warning(x):
-    return '\n '.join(m['message'] for m in x if m['style'] == MessageStyle.WARNING.value)
+def extract_warning(messages: list) -> str:
+    return '\n '.join(m['message'] for m in messages if m['style'] == MessageStyle.WARNING.value)
 
 
-def run(debug=False):
+def open_example_json(example_file) -> dict:
+    with open(example_file) as f:
+        payload = json.load(f)
+    return payload
+
+
+def run(debug=False) -> str:
     if not debug:
         payload_ns = get_payload_departures()
     else:
