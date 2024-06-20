@@ -5,13 +5,6 @@ import os
 from enum import Enum
 
 
-def get_payload_departures() -> dict:
-    response_json = get_response()
-    payload = response_json['payload']
-    departures = payload['departures']
-    return departures
-
-
 def get_response() -> dict:
     url = os.getenv('ns_url')
 
@@ -24,8 +17,9 @@ def get_response() -> dict:
     return response.json()
 
 
-def prepare_data(payload: dict) -> str:
-    data = DataFrame(payload)
+def data2prepared_html(data: dict) -> str:
+    departures = data['payload']['departures']
+    data = DataFrame(departures)
     data[['planned', 'actual', 'delay']] = refactor_dt_cols(data.actualDateTime, data.plannedDateTime)
     data = data \
         .drop(['name', 'product', 'plannedTimeZoneOffset', 'actualTimeZoneOffset', 'routeStations', 'departureStatus',
@@ -33,7 +27,7 @@ def prepare_data(payload: dict) -> str:
         .rename({'trainCategory': 'cat', 'actualTrack': 'platform'}, axis=1)
     data['warnings'] = data['messages'].apply(extract_warning)
     data = data[['planned', 'delay', 'cat', 'direction', 'platform', 'warnings']]
-    html = data.to_html(index=False, border=0)   # , col_space={'planned': 0, 'delay': 0}
+    html = data.to_html(index=False, border=0)
     return html
 
 
@@ -49,22 +43,23 @@ def refactor_dt_cols(actual: Series, planned: Series) -> DataFrame:
 
 
 def extract_warning(messages: list) -> str:
-    return '\n '.join(m['message'] for m in messages if m['style'] == MessageStyle.WARNING.value)
+    warnings = '\n '.join(m['message'] for m in messages if m['style'] == MessageStyle.WARNING.value)
+    return warnings
 
 
-def open_example_json(example_file) -> dict:
-    with open(example_file) as f:
-        payload = json.load(f)
-    return payload
+def open_example_json() -> dict:
+    with open('example_ns.json') as f:
+        data = json.load(f)
+    return data
 
 
-def run(debug=False) -> str:
+def run(debug: bool = False) -> str:
     if not debug:
-        payload_ns = get_payload_departures()
+        data = get_response()
     else:
-        payload_ns = open_example_json('example_ns.json')
-    ns = prepare_data(payload_ns)
-    return ns
+        data = open_example_json()
+    html = data2prepared_html(data)
+    return html
 
 
 class MessageStyle(Enum):

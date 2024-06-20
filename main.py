@@ -12,7 +12,7 @@ app = Flask(__name__
             , static_folder='static'
             , static_url_path='/')
 
-DEBUG = os.getenv('debug')
+DEBUG = eval(os.getenv('debug'))
 
 
 @app.route('/')
@@ -30,7 +30,7 @@ def index():
 
 
 def extract_data():
-    departures = ns_importer.run()
+    departures = ns_importer.run(debug=DEBUG)
     if DEBUG:
         with open('test_departures.html', 'w') as h:
             h.write(departures)
