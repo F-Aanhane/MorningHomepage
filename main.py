@@ -3,6 +3,7 @@ import ns_importer
 import weather_importer
 from dotenv import load_dotenv
 import os
+import pytz
 
 load_dotenv()
 
@@ -33,10 +34,10 @@ def extract_data():
     if DEBUG:
         with open('test_departures.html', 'w') as h:
             h.write(departures)
-    weather_data = weather_importer.import_weather_data()
-
     markedup_departures = Markup(departures)
-    labels = weather_data.date.dt.strftime("%H:%M").to_list()
+
+    weather_data = weather_importer.import_weather_data()
+    labels = weather_data.local_time.to_list()
     precipitation = weather_data.precipitation.to_list()
     temperature = weather_data.temperature_2m.to_list()
     temperature = [round(n, 1) for n in temperature]

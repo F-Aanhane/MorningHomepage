@@ -3,6 +3,10 @@ import requests_cache
 import pandas as pd
 from retry_requests import retry
 import os
+from datetime import datetime
+
+TZ = tz_string = datetime.now().astimezone().tzinfo
+
 
 def import_weather_data() -> pd.DataFrame:
     # Setup the Open-Meteo API client with cache and retry on error
@@ -39,16 +43,20 @@ def extract_hourly_data(response):
     hourly_precipitation_probability = hourly.Variables(1).ValuesAsNumpy()
     hourly_precipitation = hourly.Variables(2).ValuesAsNumpy()
     hourly_cloud_cover = hourly.Variables(3).ValuesAsNumpy()
-    hourly_data = {"date": pd.date_range(start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
+    hourly_data = {"datetime_range": pd.date_range(start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
                                          end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
                                          freq=pd.Timedelta(seconds=hourly.Interval()),
-                                         inclusive="left"),
+                                         inclusive="left"
+                                         ),
                    "temperature_2m": hourly_temperature_2m,
                    "precipitation_probability": hourly_precipitation_probability,
                    "precipitation": hourly_precipitation,
                    "cloud_cover": hourly_cloud_cover}
     hourly_dataframe = pd.DataFrame(data=hourly_data)
     hourly_dataframe['temperature_2m'] = hourly_dataframe['temperature_2m'].round(decimals=1)
+    hourly_dataframe['local_time'] = hourly_dataframe['datetime_range']\
+        .dt.tz_convert(TZ)\
+        .dt.strftime("%H:%M")
     return hourly_dataframe
 
 
