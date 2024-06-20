@@ -1,10 +1,8 @@
 import openmeteo_requests
 import requests_cache
 import pandas as pd
-import numpy as np
 from retry_requests import retry
 import os
-
 
 def import_weather_data() -> pd.DataFrame:
     # Setup the Open-Meteo API client with cache and retry on error
