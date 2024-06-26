@@ -1,5 +1,6 @@
 import unittest
-from ns_importer import data2prepared_html, open_example_json, extract_warning
+from unittest.mock import patch
+from ns_importer import data2prepared_html, open_example_json, extract_warning, get_response
 import os
 
 
@@ -10,16 +11,22 @@ class Ns_importer_test(unittest.TestCase):
         prepared_html = data2prepared_html(test_payload)
         self.assertMultiLineEqual(prepared_html, expected_html)
 
-    def test_extract_warning(self):
+    def test_extracting_warning(self):
         messages = [{
-                "message": "WARNING_TEST_MESSAGE",
-                "style": "WARNING"
-            }, {
-                "message": "INFO_TEST_MESSAGE",
-                "style": "INFO"
-            }]
+            "message": "WARNING_TEST_MESSAGE",
+            "style": "WARNING"
+        }, {
+            "message": "INFO_TEST_MESSAGE",
+            "style": "INFO"
+        }]
         warnings = extract_warning(messages)
         self.assertMultiLineEqual(warnings, 'WARNING_TEST_MESSAGE')
+
+    @patch('ns_importer.requests.request')
+    def test_getting_response(self, mock_request):
+        mock_request.return_value.ok = True
+        response = get_response()
+        self.assertIsNotNone(response)
 
 
 expected_html = """<table class="dataframe">
@@ -117,8 +124,5 @@ expected_html = """<table class="dataframe">
   </tbody>
 </table>"""
 
-
 if __name__ == '__main__':
     unittest.main()
-
-

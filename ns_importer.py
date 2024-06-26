@@ -14,7 +14,10 @@ def get_response() -> dict:
         'Ocp-Apim-Subscription-Key': os.getenv('key')
     }
     response = requests.request("GET", url, headers=headers, data=payload)
-    return response.json()
+    if response.ok:
+        return response.json()
+    else:
+        response.raise_for_status()
 
 
 def data2prepared_html(data: dict) -> str:
