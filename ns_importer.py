@@ -28,7 +28,7 @@ def data2prepared_html(data: dict) -> str:
         .drop(['name', 'product', 'plannedTimeZoneOffset', 'actualTimeZoneOffset', 'routeStations', 'departureStatus',
                'actualDateTime', 'plannedDateTime'], axis=1) \
         .rename({'trainCategory': 'cat', 'actualTrack': 'platform'}, axis=1)
-    data['warnings'] = data['messages'].apply(extract_warning)
+    data['warnings'] = data['messages'].apply(extract_warning_message)
     data = data[['planned', 'delay', 'cat', 'direction', 'platform', 'warnings']]
     html = data.to_html(index=False, border=0)
     return html
@@ -45,7 +45,7 @@ def refactor_dt_cols(actual: Series, planned: Series) -> DataFrame:
     return DataFrame({'planned': planned, 'actual': actual, 'delay': delay})
 
 
-def extract_warning(messages: list) -> str:
+def extract_warning_message(messages: list) -> str:
     warnings = '\n '.join(m['message'] for m in messages if m['style'] == MessageStyle.WARNING.value)
     return warnings
 
